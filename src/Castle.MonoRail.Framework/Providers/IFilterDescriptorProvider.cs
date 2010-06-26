@@ -33,8 +33,8 @@ namespace Castle.MonoRail.Framework.Providers
 		/// and return descriptors instances, or an empty array if none 
 		/// was found.
 		/// </summary>
-		/// <param name="controllerType">The controller type</param>
+		/// <param name="declaratorType">The object type</param>
 		/// <returns>An array of <see cref="FilterDescriptor"/></returns>
-		FilterDescriptor[] CollectFilters(Type controllerType);
+		FilterDescriptor[] CollectFilters(Type declaratorType);
 	}
 }
