@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Linq;
+
 namespace Castle.MonoRail.Framework
 {
 	using System;
@@ -58,6 +60,10 @@ namespace Castle.MonoRail.Framework
 		private RenderingSupport renderingSupport;
 		private IDynamicActionProviderFactory dynamicActionProviderFactory;
 		private DynamicActionProviderDescriptor[] dynamicActionProviders = new DynamicActionProviderDescriptor[0];
+		
+
+		// might need another context accessor than an instance field.
+		private IEnumerable<FilterDescriptor> currentactionfilters;
 
 		#region IController
 
@@ -113,7 +119,7 @@ namespace Castle.MonoRail.Framework
 
 			ResolveLayout();
 			CreateAndInitializeHelpers();
-			CreateFiltersDescriptors();
+			CreateFilterDescriptors();
 			CreateDynamicActionProvidersDescriptors();
 			ProcessDynamicActionProviders();
 			ProcessScaffoldIfAvailable();
@@ -1913,11 +1919,48 @@ namespace Castle.MonoRail.Framework
 
 		#region Filters
 
-		private void CreateFiltersDescriptors()
+		/// <summary>
+		/// might be renamed CreateFilterDescriptorsForCurrentRequest to reveal intent
+		/// might be changed to protected virtual
+		/// initializes controller filters member
+		/// initializes request specific currentactionfilters instance member
+		/// </summary>
+		private void CreateFilterDescriptors()
+		{
+			var filters_not_initialized = (filters == null);
+			if (filters_not_initialized)
+			{
+				filters = GetControllerLevelFilterDescriptors().ToArray();
+			}
+			currentactionfilters = filters.Union(GetCurrentActionLevelFilters());
+		}
+
+		/// <summary>
+		/// return current action filter descriptors
+		/// </summary>
+		/// <returns></returns>
+		private IEnumerable<FilterDescriptor> GetCurrentActionLevelFilters()
+		{
+			var actiondescriptor = SelectAction(Action, ActionType.Sync);
+			// manage action not found?
+			if(actiondescriptor == null)
+			{
+				return new FilterDescriptor[] { };
+			}
+			// todo define actiondescriptor.AttachedFilterDescriptors?
+
+			return new FilterDescriptor[]{};
+		}
+
+
+		private IEnumerable<FilterDescriptor> GetControllerLevelFilterDescriptors()
 		{
 			if (MetaDescriptor.Filters.Length != 0)
 			{
-				filters = CopyFilterDescriptors();
+				foreach (var descriptor in CopyFilterDescriptors())
+				{
+					yield return descriptor;
+				}
 			}
 		}
 
