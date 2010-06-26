@@ -28,6 +28,15 @@ namespace Castle.MonoRail.Framework.Descriptors
 		private IList<SkipFilterAttribute> skipFilters = new List<SkipFilterAttribute>();
 		private TransformFilterDescriptor[] transformFilters = new TransformFilterDescriptor[0];
 		private ReturnBinderDescriptor returnDescriptor;
+		
+		// should it be moved in IHasFilterDescriptors or in BaseMetaDescriptor?
+		// should it be called ActionLevelFilterDescriptors to avoid confusion? (or are we leaning toward a cascading/merging filter pipeline?)
+		/// <summary>
+		/// List of filter descriptors that applies to the current action only: 
+		/// - no filter descriptor belonging to controller here
+		/// - not holding the SkipFilter at the moment
+		/// </summary>
+		private FilterDescriptor[] filterDescriptors = new FilterDescriptor[0];
 
 		/// <summary>
 		/// Gets or sets the skip rescue associated with this action.
@@ -76,6 +85,18 @@ namespace Castle.MonoRail.Framework.Descriptors
 		{
 			get { return returnDescriptor; }
 			set { returnDescriptor = value; }
+		}
+
+		/// <summary>
+		/// <para>List of filter descriptors that applies to the current action only: </para>
+		/// <list>
+		/// <item>no filter descriptor belonging to controller here</item>
+		/// <item>is not holding the SkipFilter attributes at the moment</item>
+		/// </list>
+		/// </summary>
+		public FilterDescriptor[] FilterDescriptors
+		{
+			get { return filterDescriptors; }
 		}
 	}
 }
