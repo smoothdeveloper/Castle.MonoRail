@@ -113,7 +113,7 @@ namespace Castle.MonoRail.Framework
 
 			ResolveLayout();
 			CreateAndInitializeHelpers();
-			CreateFilterDescriptors();
+			CreateControllerLevelFilterDescriptors();
 			CreateDynamicActionProvidersDescriptors();
 			ProcessDynamicActionProviders();
 			ProcessScaffoldIfAvailable();
@@ -1916,11 +1916,11 @@ namespace Castle.MonoRail.Framework
 		/// <summary>
 		/// populates <see cref="controllerLevelFilters"/> member with controllerLevelFilters defined on this controller
 		/// </summary>
-		private void CreateFilterDescriptors()
+		private void CreateControllerLevelFilterDescriptors()
 		{
 			if (MetaDescriptor.Filters.Length != 0)
 			{
-				controllerLevelFilters = CopyFilterDescriptors();
+				controllerLevelFilters = CopyFilterDescriptors(MetaDescriptor.Filters);
 			}
 		}
 
@@ -2009,9 +2009,10 @@ namespace Castle.MonoRail.Framework
 		/// <summary>
 		/// Clones all Filter descriptors, in order to get a writable copy.
 		/// </summary>
-		protected internal FilterDescriptor[] CopyFilterDescriptors()
+		/// <param name="filterDescriptors">cloned array of <see cref="FilterDescriptor"/>.</param>
+		protected internal static FilterDescriptor[] CopyFilterDescriptors(FilterDescriptor[] filterDescriptors)
 		{
-			var clone = (FilterDescriptor[]) MetaDescriptor.Filters.Clone();
+			var clone = (FilterDescriptor[]) filterDescriptors.Clone();
 
 			for(var i = 0; i < clone.Length; i++)
 			{
