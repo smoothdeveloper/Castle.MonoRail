@@ -16,7 +16,9 @@ namespace Castle.MonoRail.Framework
 {
 	using System.Collections.Generic;
 	using System.Reflection;
+	using Castle.Core.Logging;
 	using Castle.MonoRail.Framework.Descriptors;
+	using Castle.MonoRail.Framework.Internal;
 
 	/// <summary>
 	/// Pendent
@@ -46,8 +48,22 @@ namespace Castle.MonoRail.Framework
 		/// <param name="context">The context.</param>
 		public override object Execute(IEngineContext engineContext, IController controller, IControllerContext context)
 		{
-			return actionMethod.Invoke(controller, null);
+			var executionContext = new ExecutionContext
+			{
+				Controller = controller
+				, ControllerContext = context
+				, EngineContext = engineContext
+			};
+			var loggerfactory = engineContext.Services.GetService<ILoggerFactory>() ?? new NullLogFactory();
+			var logger = loggerfactory.Create(actionMethod.DeclaringType);
+			
+			this.ExecuteFilters(executionContext, ExecuteWhen.BeforeAction, logger);
+			var actionresult = actionMethod.Invoke(controller, null);
+			this.ExecuteFilters(executionContext, ExecuteWhen.AfterAction, logger);
+
+			return actionresult;
 		}
+
 		/// <summary>
 		/// Collect filter descriptors on action
 		/// </summary>
