@@ -39,7 +39,7 @@ namespace Castle.MonoRail.Framework.Filters
 		/// <param name="action">the executable action (used to skip filters)</param>
 		/// <param name="when">restrict filters execution to those meant to execute at this time</param>
 		/// <param name="filters">non filtered filters that are meant to be executed</param>
-		/// <returns>true if all filters were executed</returns>
+		/// <returns>true if all filters were executed, false if a filter return false</returns>
 		public static bool ProcessFilters(ILogger logger, IFilterFactory filterFactory, IExecutionContext executionContext, IExecutableAction action, ExecuteWhen when, IEnumerable<FilterDescriptor> filters)
 		{
 			if (!filters.Any())

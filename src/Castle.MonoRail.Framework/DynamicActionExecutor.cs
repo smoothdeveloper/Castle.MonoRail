@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 namespace Castle.MonoRail.Framework
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using Descriptors;
+	using Castle.Core.Logging;
+	using Castle.MonoRail.Framework.Filters;
 
 	/// <summary>
 	/// provide <see cref="IExecutableAction"/> semantic over a <see cref="IDynamicAction"/> instance
@@ -137,8 +138,43 @@ namespace Castle.MonoRail.Framework
 		/// <param name="context">The context.</param>
 		public object Execute(IEngineContext engineContext, IController controller, IControllerContext context)
 		{
-			return action.Execute(engineContext, controller, context);
+			var allfilters = CollectFilters();
+
+			var executionContext = new ExecutionContext
+				{
+					Controller = controller
+					, ControllerContext = context
+					, EngineContext = engineContext
+				};
+			
+			ExecuteFilters(executionContext, ExecuteWhen.BeforeAction);
+
+			var actionresult = action.Execute(engineContext, controller, context);
+			
+			ExecuteFilters(executionContext, ExecuteWhen.AfterAction);
+			
+			return actionresult;
 		}
+
+		private IEnumerable<FilterDescriptor> getFilterDescriptorsToExecute(ExecuteWhen when)
+		{
+			return CollectFilters()
+				.Where(f => (when &= f.When) == when)
+				.OrderBy(f => f.ExecutionOrder);
+		}
+
+		private void ExecuteFilters(IExecutionContext executionContext, ExecuteWhen when)
+		{
+			var filterDescriptors = getFilterDescriptorsToExecute(when);
+			var filterFactory = executionContext.EngineContext.Services.FilterFactory;
+			var loggerFactory =
+				executionContext.EngineContext.Services.GetService<ILoggerFactory>()
+				?? new NullLogFactory()
+				;
+			var actionlogger = loggerFactory.Create(this.action.GetType());
+			FilterProcessor.ProcessFilters(actionlogger, filterFactory, executionContext, this, when, filterDescriptors);
+		}
+	
 
 		/// <summary>
 		/// Collect action filter descriptors
