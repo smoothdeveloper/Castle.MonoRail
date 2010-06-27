@@ -50,7 +50,7 @@ namespace Castle.MonoRail.Framework
 		private IViewEngineManager viewEngineManager;
 		private IActionSelector actionSelector;
 		private IScaffoldingSupport scaffoldSupport;
-		private FilterDescriptor[] filters = new FilterDescriptor[0];
+		private FilterDescriptor[] controllerLevelFilters = new FilterDescriptor[0];
 		private ValidatorRunner validatorRunner;
 		private Dictionary<object, ErrorSummary> validationSummaryPerInstance;
 		private Dictionary<object, ErrorList> boundInstances;
@@ -1914,13 +1914,13 @@ namespace Castle.MonoRail.Framework
 		#region Filters
 
 		/// <summary>
-		/// populates <see cref="filters"/> member with filters defined on this controller
+		/// populates <see cref="controllerLevelFilters"/> member with controllerLevelFilters defined on this controller
 		/// </summary>
 		private void CreateFilterDescriptors()
 		{
 			if (MetaDescriptor.Filters.Length != 0)
 			{
-				filters = CopyFilterDescriptors();
+				controllerLevelFilters = CopyFilterDescriptors();
 			}
 		}
 
@@ -1976,7 +1976,7 @@ namespace Castle.MonoRail.Framework
 		/// <returns></returns>
 		protected virtual bool ShouldSkipFilters(IExecutableAction action)
 		{
-			if (filters == null)
+			if (controllerLevelFilters == null)
 			{
 				// No filters, so skip 
 				return true;
@@ -2023,12 +2023,12 @@ namespace Castle.MonoRail.Framework
 
 		private bool ProcessFilters(IExecutableAction action, ExecuteWhen when)
 		{
-			return FilterProcessor.ProcessFilters(filters, action, when, filterFactory, logger, engineContext, this, context);
+			return FilterProcessor.ProcessFilters(controllerLevelFilters, action, when, filterFactory, logger, engineContext, this, context);
 		}
 
 		private void DisposeControllerLevelFilters()
 		{
-			DisposeFilters(filters);
+			DisposeFilters(controllerLevelFilters);
 		}
 
 		private void DisposeFilters(IEnumerable<FilterDescriptor> filterDescriptors)
