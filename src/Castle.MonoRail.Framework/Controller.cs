@@ -2020,57 +2020,7 @@ namespace Castle.MonoRail.Framework
 
 		private bool ProcessFilters(IExecutableAction action, ExecuteWhen when)
 		{
-			foreach(var desc in filters)
-			{
-				if (action.ShouldSkipFilter(desc.FilterType))
-				{
-					continue;
-				}
-
-				if ((desc.When & when) != 0)
-				{
-					if (!ProcessFilter(when, desc))
-					{
-						return false;
-					}
-				}
-			}
-
-			return true;
-		}
-
-		private bool ProcessFilter(ExecuteWhen when, FilterDescriptor desc)
-		{
-			if (desc.FilterInstance == null)
-			{
-				desc.FilterInstance = filterFactory.Create(desc.FilterType);
-
-				var filterAttAware = desc.FilterInstance as IFilterAttributeAware;
-
-				if (filterAttAware != null)
-				{
-					filterAttAware.Filter = desc.Attribute;
-				}
-			}
-
-			try
-			{
-				if (logger.IsDebugEnabled)
-				{
-					logger.DebugFormat("Running filter {0}/{1}", when, desc.FilterType.FullName);
-				}
-
-				return desc.FilterInstance.Perform(when, engineContext, this, context);
-			}
-			catch(Exception ex)
-			{
-				if (logger.IsErrorEnabled)
-				{
-					logger.Error("Error processing filter " + desc.FilterType.FullName, ex);
-				}
-
-				throw;
-			}
+			return FilterProcessor.ProcessFilters(filters, action, when, filterFactory, logger, engineContext, this, context);
 		}
 
 		private void DisposeFilters()
