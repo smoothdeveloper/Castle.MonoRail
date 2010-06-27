@@ -18,7 +18,7 @@ namespace Castle.MonoRail.Framework
 	using Descriptors;
 
 	/// <summary>
-	/// Pendent
+	/// Encapsulates information to execute an action
 	/// </summary>
 	public interface IExecutableAction
 	{
@@ -31,10 +31,10 @@ namespace Castle.MonoRail.Framework
 		bool ShouldSkipAllFilters { get; }
 
 		/// <summary>
-		/// Pendent
+		/// Determines which filters should not be executed
 		/// </summary>
 		/// <param name="filterType">Type of the filter.</param>
-		/// <returns></returns>
+		/// <returns>true if the filter type should be skipped, false if it should be executed</returns>
 		bool ShouldSkipFilter(Type filterType);
 
 		/// <summary>
