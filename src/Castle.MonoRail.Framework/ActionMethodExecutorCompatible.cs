@@ -1,4 +1,4 @@
-// Copyright 2004-2010 Castle Project - http://www.castleproject.org/
+﻿// Copyright 2004-2010 Castle Project - http://www.castleproject.org/
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,27 +14,33 @@
 
 namespace Castle.MonoRail.Framework
 {
+	using System.Collections.Generic;
 	using System.Reflection;
 	using Castle.MonoRail.Framework.Descriptors;
 
 	/// <summary>
 	/// Pendent
 	/// </summary>
-	public class ActionMethodExecutor : BaseExecutableAction
+	public class ActionMethodExecutorCompatible : ActionMethodExecutor
 	{
+		private readonly InvokeOnController invoke;
+
 		/// <summary>
 		/// Pendent
 		/// </summary>
-		protected readonly MethodInfo actionMethod;
+		public delegate object InvokeOnController(MethodInfo method, IRequest request, IDictionary<string, object> methodArgs);
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ActionMethodExecutor"/> class.
+		/// Initializes a new instance of the <see cref="Castle.MonoRail.Framework.ActionMethodExecutorCompatible"/> class.
 		/// </summary>
 		/// <param name="actionMethod">The action method.</param>
 		/// <param name="metaDescriptor">The meta descriptor.</param>
-		public ActionMethodExecutor(MethodInfo actionMethod, ActionMetaDescriptor metaDescriptor) : base(metaDescriptor)
+		/// <param name="invoke">The invoke.</param>
+		public ActionMethodExecutorCompatible(MethodInfo actionMethod, ActionMetaDescriptor metaDescriptor,
+		                                      InvokeOnController invoke) :
+		                                      	base(actionMethod, metaDescriptor)
 		{
-			this.actionMethod = actionMethod;
+			this.invoke = invoke;
 		}
 
 		/// <summary>
@@ -45,7 +51,8 @@ namespace Castle.MonoRail.Framework
 		/// <param name="context">The context.</param>
 		public override object Execute(IEngineContext engineContext, IController controller, IControllerContext context)
 		{
-			return actionMethod.Invoke(controller, null);
+			return invoke(actionMethod, engineContext.Request, context.CustomActionParameters);
 		}
 	}
+
 }
