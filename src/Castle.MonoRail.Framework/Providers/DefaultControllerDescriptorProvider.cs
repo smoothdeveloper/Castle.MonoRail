@@ -19,6 +19,7 @@ namespace Castle.MonoRail.Framework.Providers
 	using System.Reflection;
 	using System.Threading;
 	using Castle.Core.Logging;
+	using Castle.MonoRail.Framework.Internal;
 	using Castle.MonoRail.Framework.Services.Utils;
 	using Descriptors;
 
@@ -690,42 +691,6 @@ namespace Castle.MonoRail.Framework.Providers
 			else
 			{
 				return new ActionMetaDescriptor();
-			}
-		}
-
-		/// <summary>
-		/// This <see cref="IComparer"/> implementation
-		/// is used to sort the filters based on their Execution Order.
-		/// </summary>
-		private class FilterDescriptorComparer : IComparer
-		{
-			private static readonly FilterDescriptorComparer instance = new FilterDescriptorComparer();
-
-			/// <summary>
-			/// Initializes a new instance of the <see cref="FilterDescriptorComparer"/> class.
-			/// </summary>
-			private FilterDescriptorComparer()
-			{
-			}
-
-			/// <summary>
-			/// Gets the instance.
-			/// </summary>
-			/// <value>The instance.</value>
-			public static FilterDescriptorComparer Instance
-			{
-				get { return instance; }
-			}
-
-			/// <summary>
-			/// Compares the specified left.
-			/// </summary>
-			/// <param name="left">The left.</param>
-			/// <param name="right">The right.</param>
-			/// <returns></returns>
-			public int Compare(object left, object right)
-			{
-				return ((FilterDescriptor) left).ExecutionOrder - ((FilterDescriptor) right).ExecutionOrder;
 			}
 		}
 
