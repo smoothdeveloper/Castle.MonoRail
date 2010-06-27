@@ -17,6 +17,7 @@ namespace Castle.MonoRail.Framework
 	using System;
 	using Descriptors;
 	using Internal;
+	using System.Collections.Generic;
 
 	/// <summary>
 	/// 
@@ -187,5 +188,11 @@ namespace Castle.MonoRail.Framework
 		public abstract object Execute(IEngineContext engineContext, IController controller, IControllerContext context);
 
 		#endregion
+
+		/// <summary>
+		/// Collect action filter descriptors
+		/// </summary>
+		/// <returns>a sequence of filter descriptor declared on this executable action</returns>
+		public abstract IEnumerable<FilterDescriptor> CollectFilters();
 	}
 }

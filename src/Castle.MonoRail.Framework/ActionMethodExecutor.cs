@@ -48,6 +48,20 @@ namespace Castle.MonoRail.Framework
 		{
 			return actionMethod.Invoke(controller, null);
 		}
+		/// <summary>
+		/// Collect filter descriptors on action
+		/// </summary>
+		/// <returns></returns>
+		public override IEnumerable<FilterDescriptor> CollectFilters()
+		{
+			foreach(FilterAttribute filterattribute in this.actionMethod.GetCustomAttributes(typeof (FilterAttribute), true))
+			{
+				foreach(var descriptor in filterattribute.BuildFilterDescriptors())
+				{
+					yield return descriptor;
+				}
+			}
+		}
 	}
 
 	/// <summary>

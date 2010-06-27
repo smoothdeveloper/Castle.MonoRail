@@ -14,6 +14,7 @@
 
 namespace Castle.MonoRail.Framework.Tests.Actions
 {
+	using System.Linq;
 	using NUnit.Framework;
 	using Castle.MonoRail.Framework.Test;
 
@@ -37,6 +38,35 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			Assert.AreEqual(3, retVal);
 		}
 
+		[Test]
+		public void CollectFilters_expecting_single_filter_on_ActionStubWithFilter_dynamic_action()
+		{
+			var dynAction = new ActionStubWithFilter();
+
+			var executor = new DynamicActionExecutor(dynAction);
+			var filter = executor.CollectFilters().Single();
+
+			Assert.AreEqual(0, filter.ExecutionOrder);
+			Assert.AreEqual(ExecuteWhen.AfterAction, filter.When);
+			Assert.AreEqual(typeof(ActionMethodExecutorTestCase.DummyFilter), filter.FilterType);
+		}
+
+		[Filter(ExecuteWhen.AfterAction, typeof(ActionMethodExecutorTestCase.DummyFilter), ExecutionOrder = 0)]
+		public class ActionStubWithFilter : IDynamicAction
+		{
+			private bool wasExecuted;
+
+			public object Execute(IEngineContext engineContext, IController controller, IControllerContext controllerContext)
+			{
+				wasExecuted = true;
+				return 1;
+			}
+
+			public bool WasExecuted {
+				get { return wasExecuted; }
+			}
+		}
+		
 		public class ActionStub : IDynamicAction
 		{
 			private bool wasExecuted;

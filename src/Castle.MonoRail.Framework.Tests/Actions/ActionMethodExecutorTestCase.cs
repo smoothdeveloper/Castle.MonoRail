@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 namespace Castle.MonoRail.Framework.Tests.Actions
 {
 	using System.Reflection;
 	using NUnit.Framework;
 	using Castle.MonoRail.Framework.Descriptors;
 	using Castle.MonoRail.Framework.Test;
+	using System.Linq;
 
 	[TestFixture]
 	public class ActionMethodExecutorTestCase
@@ -28,7 +30,7 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			var controller = new BaseController();
 			var actionMeta = new ActionMetaDescriptor();
 
-			var executor = new ActionMethodExecutor(GetActionMethod(controller), actionMeta);
+			var executor = new ActionMethodExecutor(GetAction1Method(controller), actionMeta);
 
 			Assert.IsFalse(executor.ShouldSkipAllFilters);
 			Assert.IsFalse(executor.ShouldSkipRescues);
@@ -46,7 +48,7 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 				SkipRescue = new SkipRescueAttribute()
 			};
 
-			var executor = new ActionMethodExecutor(GetActionMethod(controller), actionMeta);
+			var executor = new ActionMethodExecutor(GetAction1Method(controller), actionMeta);
 
 			Assert.IsTrue(executor.ShouldSkipRescues);
 			Assert.IsFalse(executor.ShouldSkipAllFilters);
@@ -62,7 +64,7 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			var actionMeta = new ActionMetaDescriptor();
 			actionMeta.SkipFilters.Add(new SkipFilterAttribute());
 
-			var executor = new ActionMethodExecutor(GetActionMethod(controller), actionMeta);
+			var executor = new ActionMethodExecutor(GetAction1Method(controller), actionMeta);
 
 			Assert.IsTrue(executor.ShouldSkipAllFilters);
 			Assert.IsFalse(executor.ShouldSkipRescues);
@@ -78,7 +80,7 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			var actionMeta = new ActionMetaDescriptor();
 			actionMeta.SkipFilters.Add(new SkipFilterAttribute(typeof(DummyFilter)));
 
-			var executor = new ActionMethodExecutor(GetActionMethod(controller), actionMeta);
+			var executor = new ActionMethodExecutor(GetAction1Method(controller), actionMeta);
 
 			Assert.IsTrue(executor.ShouldSkipFilter(typeof(DummyFilter)));
 			Assert.IsFalse(executor.ShouldSkipRescues);
@@ -96,7 +98,7 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 				Layout = new LayoutDescriptor("layoutname")
 			};
 
-			var executor = new ActionMethodExecutor(GetActionMethod(controller), actionMeta);
+			var executor = new ActionMethodExecutor(GetAction1Method(controller), actionMeta);
 
 			Assert.IsFalse(executor.ShouldSkipFilter(typeof(DummyFilter)));
 			Assert.IsFalse(executor.ShouldSkipRescues);
@@ -114,7 +116,7 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 				Resources = new[] { new ResourceDescriptor(typeof(BaseController), "name", "resname", "cult", "assm") }
 			};
 
-			var executor = new ActionMethodExecutor(GetActionMethod(controller), actionMeta);
+			var executor = new ActionMethodExecutor(GetAction1Method(controller), actionMeta);
 
 			Assert.IsFalse(executor.ShouldSkipFilter(typeof(DummyFilter)));
 			Assert.IsFalse(executor.ShouldSkipRescues);
@@ -129,7 +131,7 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			var controller = new BaseController();
 			var actionMeta = new ActionMetaDescriptor();
 
-			var executor = new ActionMethodExecutor(GetActionMethod(controller), actionMeta);
+			var executor = new ActionMethodExecutor(GetAction1Method(controller), actionMeta);
 
 			var req = new StubRequest();
 			var res = new StubResponse();
@@ -141,9 +143,30 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			Assert.AreEqual(1, retVal);
 		}
 
-		private MethodInfo GetActionMethod(object controller)
+		[Test] 
+		public void CollectFilters_expecting_single_filter_on_DummyController_Action2HasFilter()
+		{
+			var controller = new BaseController();
+			var actionMeta = new ActionMetaDescriptor();
+			var executor = new ActionMethodExecutor(GetActionMethod(controller, "Action2HasFilter"), actionMeta);
+
+			var filter = executor.CollectFilters().Single();
+
+			Assert.AreEqual(0, filter.ExecutionOrder);
+			Assert.AreEqual(typeof(DummyFilter), filter.FilterType);
+			Assert.AreEqual(ExecuteWhen.AfterAction, filter.When);
+		}
+
+
+
+		private MethodInfo GetAction1Method(object controller)
 		{
 			return controller.GetType().GetMethod("Action1");
+		}
+
+
+		private MethodInfo GetActionMethod(object controller, string caseSensitiveMethodName) {
+			return controller.GetType().GetMethod(caseSensitiveMethodName);
 		}
 
 		public class BaseController : Controller
@@ -159,6 +182,11 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			public bool WasExecuted
 			{
 				get { return wasExecuted; }
+			}
+			[Filter(ExecuteWhen.AfterAction, typeof(DummyFilter),ExecutionOrder = 0)]
+			public void Action2HasFilter()
+			{
+				
 			}
 		}
 
