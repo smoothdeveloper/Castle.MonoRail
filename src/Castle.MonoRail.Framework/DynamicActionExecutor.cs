@@ -18,7 +18,7 @@ namespace Castle.MonoRail.Framework
 	using Descriptors;
 
 	/// <summary>
-	/// Pendent
+	/// provide <see cref="IExecutableAction"/> semantic over a <see cref="IDynamicAction"> instance
 	/// </summary>
 	public class DynamicActionExecutor : IExecutableAction
 	{
