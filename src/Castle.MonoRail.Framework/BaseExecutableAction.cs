@@ -43,6 +43,10 @@ namespace Castle.MonoRail.Framework
 		/// Gets the action meta descriptor.
 		/// </summary>
 		/// <value>The action meta descriptor.</value>
+		/// <remarks>
+		/// this member is not declared on <see cref="IExecutableAction"/> 
+		/// avoid relying on this outside of the MonoRail framework assembly
+		/// </remarks>
 		public ActionMetaDescriptor ActionMetaDescriptor
 		{
 			get { return actionMetaDescriptor; }
