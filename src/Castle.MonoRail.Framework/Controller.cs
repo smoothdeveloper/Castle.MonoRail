@@ -2028,12 +2028,17 @@ namespace Castle.MonoRail.Framework
 
 		private void DisposeControllerLevelFilters()
 		{
-			if (filters == null)
+			DisposeFilters(filters);
+		}
+
+		private void DisposeFilters(IEnumerable<FilterDescriptor> filterDescriptors)
+		{
+			if (filterDescriptors == null)
 			{
 				return;
 			}
 
-			foreach(var desc in filters)
+			foreach (var desc in filterDescriptors)
 			{
 				if (desc.FilterInstance != null)
 				{
