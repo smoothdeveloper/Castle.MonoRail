@@ -164,28 +164,11 @@ namespace Castle.MonoRail.Framework
 			{
 				action = SelectAction(Action, ActionType.AsyncBegin);
 
-				if (action == null)
-				{
-					throw new MonoRailException(404, "Not Found", "Could not find action named " +
-					                                              Action + " on controller " + AreaName + "\\" + Name);
-				}
-
-				EnsureActionIsAccessibleWithCurrentHttpVerb(action);
-
-				RunBeforeActionFilters(action, out cancel);
-
-				CreateControllerLevelResources();
-				CreateActionLevelResources(action);
-				ResolveLayout(action);
-
+				cancel = RunEverythingSyncrhonouslyBeforeActionAndReturnIfActionShouldBeCancelled(action, true);
+			
 				if (cancel)
 				{
 					return new FailedToExecuteBeginActionAsyncResult();
-				}
-
-				if (BeforeAction != null)
-				{
-					BeforeAction(action, engineContext, this, context);
 				}
 
 				return (IAsyncResult) action.Execute(engineContext, this, context);
@@ -1583,7 +1566,47 @@ namespace Castle.MonoRail.Framework
 		{
 			context.LayoutNames = ObtainDefaultLayoutName();
 		}
+		/// <summary>
+		/// runs everything that should occur before action 
+		/// and returns wether the action execution should be cancelled or no
+		/// </summary>
+		/// <param name="action">the action that will be run after this method call if nothing avoids it</param>
+		/// <returns>true if should be canceled, false elseway</returns>
+		private bool RunEverythingSyncrhonouslyBeforeActionAndReturnIfActionShouldBeCancelled(IExecutableAction action, bool isAsync)
+		{
+			bool cancel;
+			if (action == null) {
+				throw new MonoRailException(404, "Not Found", "Could not find action named " +
+																											Action + " on controller " + AreaName + "\\" + Name);
+			}
 
+			EnsureActionIsAccessibleWithCurrentHttpVerb(action);
+
+			RunBeforeActionFilters(action, out cancel);
+
+			if (cancel) {
+				return cancel;
+			}
+
+			CreateControllerLevelResources();
+			CreateActionLevelResources(action);
+			if(!isAsync)  // probably a bug of async implementation
+			{
+				CreateTransformsFilters(action);
+			}
+			ResolveLayout(action);
+
+			// a bit silly might have returned a bit higher
+			if (cancel) 
+			{ 
+				return cancel;
+			}
+
+			if (BeforeAction != null) {
+				BeforeAction(action, engineContext, this, context);
+			}
+			return false;
+		}
 
 		private void RunActionAndRenderView()
 		{
@@ -1595,37 +1618,10 @@ namespace Castle.MonoRail.Framework
 			{
 				action = SelectAction(Action, ActionType.Sync);
 
-				if (action == null)
-				{
-					throw new MonoRailException(404, "Not Found", "Could not find action named " +
-					                                              Action + " on controller " + AreaName + "\\" + Name);
-				}
-
-				EnsureActionIsAccessibleWithCurrentHttpVerb(action);
-
-				RunBeforeActionFilters(action, out cancel);
-
-				if (cancel)
-				{
-					return;
-				}
-
-				CreateControllerLevelResources();
-				CreateActionLevelResources(action);
-				CreateTransformsFilters(action);
-				ResolveLayout(action);
-
-				if (cancel)
-				{
-					return;
-				}
-
-				if (BeforeAction != null)
-				{
-					BeforeAction(action, engineContext, this, context);
-				}
+				cancel = RunEverythingSyncrhonouslyBeforeActionAndReturnIfActionShouldBeCancelled(action, false);
 
 				var actionRetValue = action.Execute(engineContext, this, context);
+
 
 				// TO DO: review/refactor this code
 				if (action.ReturnBinderDescriptor != null)
