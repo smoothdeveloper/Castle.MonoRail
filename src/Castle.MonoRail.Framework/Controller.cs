@@ -113,7 +113,7 @@ namespace Castle.MonoRail.Framework
 
 			ResolveLayout();
 			CreateAndInitializeHelpers();
-			CreateFiltersDescriptors();
+			CreateFilterDescriptors();
 			CreateDynamicActionProvidersDescriptors();
 			ProcessDynamicActionProviders();
 			ProcessScaffoldIfAvailable();
@@ -1913,7 +1913,10 @@ namespace Castle.MonoRail.Framework
 
 		#region Filters
 
-		private void CreateFiltersDescriptors()
+		/// <summary>
+		/// populates <see cref="filters"/> member with filters defined on this controller
+		/// </summary>
+		private void CreateFilterDescriptors()
 		{
 			if (MetaDescriptor.Filters.Length != 0)
 			{
