@@ -345,7 +345,7 @@ namespace Castle.MonoRail.Framework
 		/// </summary>
 		public virtual void Dispose()
 		{
-			DisposeFilters();
+			DisposeControllerLevelFilters();
 			DisposeDynamicActionProviders();
 		}
 
@@ -2026,7 +2026,7 @@ namespace Castle.MonoRail.Framework
 			return FilterProcessor.ProcessFilters(filters, action, when, filterFactory, logger, engineContext, this, context);
 		}
 
-		private void DisposeFilters()
+		private void DisposeControllerLevelFilters()
 		{
 			if (filters == null)
 			{
