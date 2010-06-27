@@ -4,7 +4,26 @@ using Castle.Core.Logging;
 using Castle.MonoRail.Framework.Descriptors;
 
 namespace Castle.MonoRail.Framework.Internal {
+	/// <summary>
+	/// encapsulate current filter execution behaviour
+	/// <remarks>was extracted from <see cref="Controller"/> implementation</remarks>
+	/// </summary>
 	static internal class FilterProcessor {
+
+		/// <summary>
+		/// executes all filters 
+		/// <list>
+		/// <item>that are not meant to be skipped</item>
+		/// <item>matching the When criteria</item>
+		/// </list> 
+		/// </summary>
+		/// <param name="logger">logger of the component declaring the filter (probably a controller or a dynamic action)</param>
+		/// <param name="filterFactory">filter factory to instanciate filters</param>
+		/// <param name="executionContext">current execution context</param>
+		/// <param name="action">the executable action (used to skip filters)</param>
+		/// <param name="when">restrict filters execution to those meant to execute at this time</param>
+		/// <param name="filters">non filtered filters that are meant to be executed</param>
+		/// <returns>true if all filters were executed, false if a filter returned false</returns>
 		public static bool ProcessFilters(IEnumerable<FilterDescriptor> filters, IExecutableAction action, ExecuteWhen when, IFilterFactory filterFactory, ILogger filterOwnerLogger, IEngineContext engineContext, IController controller, IControllerContext controllerContext)
 		{
 			foreach (var desc in filters) {
