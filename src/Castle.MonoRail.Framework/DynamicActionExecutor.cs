@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
 namespace Castle.MonoRail.Framework
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using Descriptors;
 
 	/// <summary>
-	/// provide <see cref="IExecutableAction"/> semantic over a <see cref="IDynamicAction"> instance
+	/// provide <see cref="IExecutableAction"/> semantic over a <see cref="IDynamicAction"/> instance
 	/// </summary>
 	public class DynamicActionExecutor : IExecutableAction
 	{
@@ -135,6 +138,18 @@ namespace Castle.MonoRail.Framework
 		public object Execute(IEngineContext engineContext, IController controller, IControllerContext context)
 		{
 			return action.Execute(engineContext, controller, context);
+		}
+
+		/// <summary>
+		/// Collect action filter descriptors
+		/// </summary>
+		/// <returns>a sequence of filter descriptor declared on the dynamic action class</returns>
+		public IEnumerable<FilterDescriptor> CollectFilters() {
+			var filters = (FilterAttribute[])this.action.GetType().GetCustomAttributes(typeof(FilterAttribute), true);
+			return filters
+				.OrderBy(f => f.ExecutionOrder)
+				.Select(f => new FilterDescriptor(f))
+				;
 		}
 	}
 }

@@ -16,6 +16,8 @@ namespace Castle.MonoRail.Framework
 {
 	using System;
 	using Descriptors;
+	using System.Collections.Generic;
+	using Castle.MonoRail.Framework.Providers;
 
 	/// <summary>
 	/// Pendent
@@ -93,5 +95,12 @@ namespace Castle.MonoRail.Framework
 		/// <param name="controller">The controller.</param>
 		/// <param name="context">The context.</param>
 		object Execute(IEngineContext engineContext, IController controller, IControllerContext context);
+
+		/// <summary>
+		/// Collect action filter descriptors
+		/// </summary>
+		/// <returns>a sequence of filter descriptor declared on this executable action</returns>
+		IEnumerable<FilterDescriptor> CollectFilters();
+		
 	}
 }
