@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Linq;
-
 namespace Castle.MonoRail.Framework
 {
 	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Collections.Specialized;
+	using System.Linq;
 	using System.IO;
 	using System.Net.Mail;
 	using System.Reflection;
@@ -30,8 +29,8 @@ namespace Castle.MonoRail.Framework
 	using Castle.MonoRail.Framework.Descriptors;
 	using Castle.MonoRail.Framework.Resources;
 	using Castle.MonoRail.Framework.Internal;
+	using Castle.MonoRail.Framework.Filters;
 	using Core;
-
 	using Helpers;
 
 	/// <summary>
@@ -2063,57 +2062,21 @@ namespace Castle.MonoRail.Framework
 
 		private bool ProcessFilters(IExecutableAction action, ExecuteWhen when)
 		{
-			foreach(var desc in filters)
-			{
-				if (action.ShouldSkipFilter(desc.FilterType))
-				{
-					continue;
-				}
-
-				if ((desc.When & when) != 0)
-				{
-					if (!ProcessFilter(when, desc))
-					{
-						return false;
-					}
-				}
-			}
-
-			return true;
-		}
-
-		private bool ProcessFilter(ExecuteWhen when, FilterDescriptor desc)
-		{
-			if (desc.FilterInstance == null)
-			{
-				desc.FilterInstance = filterFactory.Create(desc.FilterType);
-
-				var filterAttAware = desc.FilterInstance as IFilterAttributeAware;
-
-				if (filterAttAware != null)
-				{
-					filterAttAware.Filter = desc.Attribute;
-				}
-			}
-
-			try
-			{
-				if (logger.IsDebugEnabled)
-				{
-					logger.DebugFormat("Running filter {0}/{1}", when, desc.FilterType.FullName);
-				}
-
-				return desc.FilterInstance.Perform(when, engineContext, this, context);
-			}
-			catch(Exception ex)
-			{
-				if (logger.IsErrorEnabled)
-				{
-					logger.Error("Error processing filter " + desc.FilterType.FullName, ex);
-				}
-
-				throw;
-			}
+			var executioncontext
+				= new ExecutionContext
+				  	{
+				  		Controller = this,
+				  		ControllerContext = ControllerContext,
+				  		EngineContext = engineContext
+				  	};
+			return FilterProcessor.ProcessFilters(
+				logger,
+				filterFactory,
+				executioncontext,
+				action,
+				when,
+				filters
+				);
 		}
 
 		private void DisposeFilters()
