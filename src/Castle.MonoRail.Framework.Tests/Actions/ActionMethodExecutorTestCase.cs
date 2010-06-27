@@ -153,8 +153,8 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			var filter = executor.CollectFilters().Single();
 
 			Assert.AreEqual(0, filter.ExecutionOrder);
-			Assert.AreEqual(typeof(DummyFilter), filter.FilterType);
-			Assert.AreEqual(ExecuteWhen.AfterAction, filter.When);
+			Assert.AreEqual(typeof(StubFilter), filter.FilterType);
+			Assert.AreEqual(ExecuteWhen.Always, filter.When);
 		}
 
 
@@ -183,7 +183,7 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			{
 				get { return wasExecuted; }
 			}
-			[Filter(ExecuteWhen.AfterAction, typeof(DummyFilter),ExecutionOrder = 0)]
+			[Filter(ExecuteWhen.Always, typeof(StubFilter),ExecutionOrder = 0)]
 			public void Action2HasFilter()
 			{
 				

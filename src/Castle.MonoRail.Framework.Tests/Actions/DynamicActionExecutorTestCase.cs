@@ -14,9 +14,11 @@
 
 namespace Castle.MonoRail.Framework.Tests.Actions
 {
+	using System;
 	using System.Linq;
 	using NUnit.Framework;
 	using Castle.MonoRail.Framework.Test;
+
 
 	[TestFixture]
 	public class DynamicActionExecutorTestCase
@@ -47,26 +49,11 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 			var filter = executor.CollectFilters().Single();
 
 			Assert.AreEqual(0, filter.ExecutionOrder);
-			Assert.AreEqual(ExecuteWhen.AfterAction, filter.When);
-			Assert.AreEqual(typeof(ActionMethodExecutorTestCase.DummyFilter), filter.FilterType);
+			Assert.AreEqual(ExecuteWhen.Always, filter.When);
+			Assert.AreEqual(typeof(StubFilter), filter.FilterType);
 		}
 
-		[Filter(ExecuteWhen.AfterAction, typeof(ActionMethodExecutorTestCase.DummyFilter), ExecutionOrder = 0)]
-		public class ActionStubWithFilter : IDynamicAction
-		{
-			private bool wasExecuted;
 
-			public object Execute(IEngineContext engineContext, IController controller, IControllerContext controllerContext)
-			{
-				wasExecuted = true;
-				return 1;
-			}
-
-			public bool WasExecuted {
-				get { return wasExecuted; }
-			}
-		}
-		
 		public class ActionStub : IDynamicAction
 		{
 			private bool wasExecuted;
@@ -85,6 +72,28 @@ namespace Castle.MonoRail.Framework.Tests.Actions
 
 		public class DummyController : Controller
 		{
+		}
+	}
+
+	public class StubFilter : IFilter {
+
+		internal static Func<ExecuteWhen, bool> stubFilterFunctor = (ew) => { throw new NotImplementedException(); };
+		public bool Perform(ExecuteWhen exec, IEngineContext context, IController controller, IControllerContext controllerContext) {
+			return stubFilterFunctor(exec);
+		}
+	}
+
+	[Filter(ExecuteWhen.Always, typeof(StubFilter), ExecutionOrder = 0)]
+	public class ActionStubWithFilter : IDynamicAction {
+		private bool wasExecuted;
+
+		public object Execute(IEngineContext engineContext, IController controller, IControllerContext controllerContext) {
+			wasExecuted = true;
+			return 1;
+		}
+
+		public bool WasExecuted {
+			get { return wasExecuted; }
 		}
 	}
 }
