@@ -240,21 +240,7 @@ namespace Castle.MonoRail.Framework
 
 				var actionRetValue = action.Execute(engineContext, this, context);
 
-				// TO DO: review/refactor this code
-				if (action.ReturnBinderDescriptor != null)
-				{
-					var binder = action.ReturnBinderDescriptor.ReturnTypeBinder;
-
-					// Runs return binder and keep going
-					binder.Bind(Context, this, ControllerContext, action.ReturnBinderDescriptor.ReturnType, actionRetValue);
-				}
-
-				// Action executed successfully, so it's safe to process the cache configurer
-				if ((MetaDescriptor.CacheConfigurer != null || action.CachePolicyConfigurer != null) &&
-				    !Response.WasRedirected && Response.StatusCode == 200)
-				{
-					ConfigureCachePolicy(action);
-				}
+				RunEverythingSyncrhounouslyAfterAction(action, actionRetValue);
 			}
 			catch(MonoRailException ex)
 			{
@@ -1622,22 +1608,7 @@ namespace Castle.MonoRail.Framework
 
 				var actionRetValue = action.Execute(engineContext, this, context);
 
-
-				// TO DO: review/refactor this code
-				if (action.ReturnBinderDescriptor != null)
-				{
-					var binder = action.ReturnBinderDescriptor.ReturnTypeBinder;
-
-					// Runs return binder and keep going
-					binder.Bind(Context, this, ControllerContext, action.ReturnBinderDescriptor.ReturnType, actionRetValue);
-				}
-
-				// Action executed successfully, so it's safe to process the cache configurer
-				if ((MetaDescriptor.CacheConfigurer != null || action.CachePolicyConfigurer != null) &&
-				    !Response.WasRedirected && Response.StatusCode == 200)
-				{
-					ConfigureCachePolicy(action);
-				}
+				RunEverythingSyncrhounouslyAfterAction(action, actionRetValue);
 			}
 			catch(MonoRailException ex)
 			{
@@ -1723,6 +1694,25 @@ namespace Castle.MonoRail.Framework
 						throw;
 					}
 				}
+			}
+		}
+
+		private void RunEverythingSyncrhounouslyAfterAction(IExecutableAction action, object actionReturnValue)
+		{
+			// TO DO: review/refactor this code
+			if (action.ReturnBinderDescriptor != null)
+			{
+				var binder = action.ReturnBinderDescriptor.ReturnTypeBinder;
+
+				// Runs return binder and keep going
+				binder.Bind(Context, this, ControllerContext, action.ReturnBinderDescriptor.ReturnType, actionReturnValue);
+			}
+
+			// Action executed successfully, so it's safe to process the cache configurer
+			if ((MetaDescriptor.CacheConfigurer != null || action.CachePolicyConfigurer != null) &&
+			    !Response.WasRedirected && Response.StatusCode == 200)
+			{
+				ConfigureCachePolicy(action);
 			}
 		}
 
