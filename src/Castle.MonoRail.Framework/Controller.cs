@@ -1557,6 +1557,11 @@ namespace Castle.MonoRail.Framework
 		/// and returns wether the action execution should be cancelled or no
 		/// </summary>
 		/// <param name="action">the action that will be run after this method call if nothing avoids it</param>
+		/// <param name="isAsync">this is used to alternate suspicious behaviour of managing TransformFilters 
+		/// <remarks>
+		/// see: http://support.castleproject.org/projects/MR/issues/view/MR-ISSUE-564
+		/// </remarks>
+		/// </param>
 		/// <returns>true if should be canceled, false elseway</returns>
 		private bool RunEverythingSyncrhonouslyBeforeActionAndReturnIfActionShouldBeCancelled(IExecutableAction action, bool isAsync)
 		{
