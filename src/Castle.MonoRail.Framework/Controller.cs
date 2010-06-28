@@ -240,7 +240,7 @@ namespace Castle.MonoRail.Framework
 
 				var actionRetValue = action.Execute(engineContext, this, context);
 
-				RunEverythingSyncrhounouslyAfterAction(action, actionRetValue);
+				RunEverythingSyncrhounouslyAfterActionAgainstActionResult(action, actionRetValue);
 			}
 			catch(MonoRailException ex)
 			{
@@ -1608,7 +1608,7 @@ namespace Castle.MonoRail.Framework
 
 				var actionRetValue = action.Execute(engineContext, this, context);
 
-				RunEverythingSyncrhounouslyAfterAction(action, actionRetValue);
+				RunEverythingSyncrhounouslyAfterActionAgainstActionResult(action, actionRetValue);
 			}
 			catch(MonoRailException ex)
 			{
@@ -1697,7 +1697,7 @@ namespace Castle.MonoRail.Framework
 			}
 		}
 
-		private void RunEverythingSyncrhounouslyAfterAction(IExecutableAction action, object actionReturnValue)
+		private void RunEverythingSyncrhounouslyAfterActionAgainstActionResult(IExecutableAction action, object actionReturnValue)
 		{
 			// TO DO: review/refactor this code
 			if (action.ReturnBinderDescriptor != null)
